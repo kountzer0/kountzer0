@@ -1,28 +1,32 @@
 [gcode_macro MANUAL_BED_LEVEL]
 gcode:
-  G28   # Home all axes
-  M84   # Disable steppers (allow manual movement if needed)
+  G28                 # Home all axes (Z to bottom-endstop, X/Y to back-right)
+  M84                 # Disable steppers (allow manual movement if needed)
   RESPOND TYPE=command MSG="Starting manual bed level - adjust screws at each point"
-  # Move to front-left screw (X0 Y250, Z0.2)
-  G0 Z10 F3000   # Lift Z for safe move
-  G0 X0 Y250 F3000
+
+  # Move to front-left screw (X0 Y0)
+  G0 Z10 F3000        # Lift Z for safe move
+  G0 X0 Y0 F3000
   G0 Z0.2 F300
-  RESPOND TYPE=command MSG="At front-left (X0 Y250) - adjust screw with paper test. Press ENTER in console when done."
-  PAUSE   # Wait for user to press RESUME in Mainsail
-  # Move to front-right screw (X300 Y250, Z0.2)
+  RESPOND TYPE=command MSG="At front-left (X0 Y0) - adjust screw with paper test. Press RESUME in Fluidd when done."
+  PAUSE               
+
+  # Move to front-right screw (X300 Y0)
   G0 Z10 F3000
-  G0 X300 Y250 F3000
+  G0 X300 Y0 F3000
   G0 Z0.2 F300
-  RESPOND TYPE=command MSG="At front-right (X300 Y250) - adjust screw. Press ENTER when done."
+  RESPOND TYPE=command MSG="At front-right (X300 Y0) - adjust screw. Press RESUME in Fluidd when done."
   PAUSE
-  # Move to center screw (X150 Y0, Z0.2)
+
+  # Move to rear-center screw (X150 Y250)
   G0 Z10 F3000
-  G0 X150 Y0 F3000
+  G0 X150 Y250 F3000
   G0 Z0.2 F300
-  RESPOND TYPE=command MSG="At center (X150 Y0) - adjust screw. Press ENTER when done."
+  RESPOND TYPE=command MSG="At rear-center (X150 Y250) - adjust screw. Press RESUME in Fluidd when done."
   PAUSE
+
   # Done - lift Z and park
   G0 Z10 F3000
-  G28 X Y   # Home X/Y
-  M84       # Disable steppers
+  G28 X Y             # Home X/Y
+  M84                 # Disable steppers
   RESPOND TYPE=command MSG="Manual bed level complete"
