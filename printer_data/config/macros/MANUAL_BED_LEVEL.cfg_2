@@ -1,35 +1,47 @@
-[gcode_macro MANUAL_BED_LEVEL]
+[gcode_macro MANUAL_LEVEL_WITH_FAN]
 gcode:
-  G28                       # Home all axes (Z to bottom-endstop, X/Y to back-right)
-  M84                       # Disable steppers for manual movement
-  RESPOND TYPE=command MSG="Starting manual bed level - adjust screws at each point"
+  RESPOND TYPE=command MSG="Starting one-click manual bed leveling workflow"
 
-  # --- Front-left screw ---
-  G0 Z10 F3000              # Lift Z for safe move
+  # --- Step 1: Manual Bed Leveling ---
+  G28                      # Home all axes (Z bottom-endstop, X/Y back-right)
+  M84                      # Disable steppers for manual movement
+  RESPOND TYPE=command MSG="Adjust screws at each point. Pauses will guide you."
+
+  # Front-left
+  G0 Z10 F3000
   G0 X0 Y0 F3000
   G0 Z0.2 F300
-  RESPOND TYPE=command MSG="Front-left (X0 Y0): Adjust screw and paper test. Press RESUME when done."
+  RESPOND TYPE=command MSG="Front-left: Adjust screw with paper. Press RESUME."
   PAUSE
-  SET_GCODE_OFFSET Z=0      # Record current Z as offset for front-left
+  SET_GCODE_OFFSET Z=0
 
-  # --- Front-right screw ---
+  # Front-right
   G0 Z10 F3000
   G0 X300 Y0 F3000
   G0 Z0.2 F300
-  RESPOND TYPE=command MSG="Front-right (X300 Y0): Adjust screw and paper test. Press RESUME when done."
+  RESPOND TYPE=command MSG="Front-right: Adjust screw with paper. Press RESUME."
   PAUSE
-  SET_GCODE_OFFSET Z=0      # Record current Z as offset for front-right
+  SET_GCODE_OFFSET Z=0
 
-  # --- Rear-center screw ---
+  # Rear-center
   G0 Z10 F3000
   G0 X150 Y250 F3000
   G0 Z0.2 F300
-  RESPOND TYPE=command MSG="Rear-center (X150 Y250): Adjust screw and paper test. Press RESUME when done."
+  RESPOND TYPE=command MSG="Rear-center: Adjust screw with paper. Press RESUME."
   PAUSE
-  SET_GCODE_OFFSET Z=0      # Record current Z as offset for rear-center
+  SET_GCODE_OFFSET Z=0
 
-  # --- Done ---
+  # --- Step 2: Save Manual Mesh ---
   G0 Z10 F3000
-  G28 X Y                   # Home X/Y
-  M84                       # Disable steppers
-  RESPOND TYPE=command MSG="Manual bed level complete. Z-offsets recorded."
+  BED_MESH_PROFILE SAVE NAME=manual_mesh
+  RESPOND TYPE=command MSG="Manual mesh saved as 'manual_mesh'."
+
+  # --- Step 3: Fan Ramp ---
+  RESPOND TYPE=command MSG="Starting gentle heatbreak fan ramp..."
+  RUN_HEATBREAK_FAN_RAMP_ASYNC
+  RESPOND TYPE=command MSG="Heatbreak fan ramp running. PID calibration can be done safely now."
+
+  # --- Step 4: Finish ---
+  G28 X Y
+  M84
+  RESPOND TYPE=command MSG="Workflow complete. Ready for PID or print."
